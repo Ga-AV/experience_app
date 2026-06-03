@@ -1,4 +1,5 @@
 import 'package:experience_app/features/onboarding/data/models/interests_model.dart';
+import 'package:experience_app/features/subscription/presentation/view/subscription_view.dart';
 import 'package:flutter/material.dart';
 
 class InterestsView extends StatefulWidget {
@@ -131,9 +132,14 @@ class _InterestsViewState extends State<InterestsView> {
                         ),
                       ),
                       onPressed: () {
-                        _pageController.nextPage(
-                          duration: Duration(milliseconds: 300),
-                          curve: Curves.easeInOut,
+                        // _pageController.nextPage(
+                        //   duration: Duration(milliseconds: 300),
+                        //   curve: Curves.easeInOut,
+                        // );
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const SubscriptionView(),
+                          ),
                         );
                       },
                       child: Text(
