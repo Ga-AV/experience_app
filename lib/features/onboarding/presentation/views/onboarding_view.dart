@@ -1,62 +1,69 @@
-import 'package:experience_app/features/onboarding/data/models/onboarding_model.dart';
-import 'package:experience_app/features/onboarding/presentation/views/interests_view.dart';
+import 'package:experience_app/features/onboarding/presentation/state/onboarding_provider.dart';
+import 'package:experience_app/features/onboarding/presentation/widgets/onboarding_button.dart';
+import 'package:experience_app/features/onboarding/presentation/widgets/onboarding_dots.dart';
+import 'package:experience_app/features/onboarding/presentation/widgets/onboarding_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class OnboardingView extends StatefulWidget {
+import 'interests_view.dart';
+
+class OnboardingView extends ConsumerStatefulWidget {
   const OnboardingView({super.key});
 
   @override
-  State<OnboardingView> createState() => _OnboardingViewState();
+  ConsumerState<OnboardingView> createState() => _OnboardingViewState();
 }
 
-class _OnboardingViewState extends State<OnboardingView> {
-  final PageController _controller = PageController();
-  int currentPage = 0;
+class _OnboardingViewState extends ConsumerState<OnboardingView> {
+  late final PageController _controller;
 
-  final List<OnboardingModel> items = [
-    OnboardingModel(
-      title: "Create a prototype in just a few minutes",
-      subtitle:
-          "Enjoy these pre-made components and worry only about creating the best product ever.",
-      image: "assets/onboarding.png",
-    ),
-    OnboardingModel(
-      title: "Create a prototype",
-      subtitle: "Build apps quickly and easily.",
-      image: "assets/onboarding.png",
-    ),
-    OnboardingModel(
-      title: "Launch your app",
-      subtitle: "Ship your ideas.",
-      image: "assets/onboarding.png",
-    ),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _controller = PageController();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _handleNext() {
+    final notifier = ref.read(onboardingNotifierProvider.notifier);
+
+    final state = ref.read(onboardingNotifierProvider);
+
+    if (!notifier.isLastPage) {
+      _controller.nextPage(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.ease,
+      );
+    } else {
+      Navigator.of(
+        context,
+      ).push(MaterialPageRoute(builder: (_) => const InterestsView()));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final state = ref.watch(onboardingNotifierProvider);
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: PageView.builder(
         controller: _controller,
-        itemCount: items.length,
+        itemCount: state.items.length,
         onPageChanged: (index) {
-          setState(() {
-            currentPage = index;
-          });
+          ref.read(onboardingNotifierProvider.notifier).changePage(index);
         },
         itemBuilder: (context, index) {
-          final item = items[index];
+          final item = state.items[index];
 
           return Column(
             children: [
-              Expanded(
-                flex: 6,
-                child: Container(
-                  width: double.infinity,
-                  color: const Color(0xFFDDE3EC),
-                  child: Center(child: Image.asset(item.image, width: 800)),
-                ),
-              ),
+              Expanded(flex: 6, child: OnboardingPage(item: item)),
               Expanded(
                 flex: 4,
                 child: Padding(
@@ -64,75 +71,31 @@ class _OnboardingViewState extends State<OnboardingView> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        children: List.generate(
-                          items.length,
-                          (dotIndex) => Container(
-                            margin: const EdgeInsets.only(right: 8),
-                            width: 10,
-                            height: 10,
-                            decoration: BoxDecoration(
-                              color: currentPage == dotIndex
-                                  ? Colors.blue
-                                  : Colors.grey.shade300,
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                        ),
+                      OnboardingDots(
+                        currentPage: state.currentPage,
+                        total: state.items.length,
                       ),
-                      SizedBox(height: 32),
+                      const SizedBox(height: 32),
                       Text(
                         item.title,
                         style: const TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.w800,
-                          height: 1.2,
                         ),
                       ),
 
-                      SizedBox(height: 20),
+                      const SizedBox(height: 20),
 
                       Text(
                         item.subtitle,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.black,
-                          height: 1.5,
-                        ),
+                        style: const TextStyle(fontSize: 14, height: 1.5),
                       ),
-                      Spacer(),
-                      SizedBox(
-                        width: double.infinity,
-                        height: 58,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                          ),
-                          onPressed: () {
-                            if (currentPage < items.length - 1) {
-                              _controller.nextPage(
-                                duration: const Duration(milliseconds: 300),
-                                curve: Curves.ease,
-                              );
-                            }
-                            if (currentPage == items.length - 1) {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) => InterestsView(),
-                                ),
-                              );
-                            }
-                          },
-                          child: Text(
-                            currentPage == items.length - 1
-                                ? "Get Started"
-                                : "Next",
-                            style: TextStyle(fontSize: 18, color: Colors.white),
-                          ),
-                        ),
+
+                      const Spacer(),
+
+                      OnboardingButton(
+                        text: notifierLabel(state),
+                        onPressed: _handleNext,
                       ),
                     ],
                   ),
@@ -143,5 +106,9 @@ class _OnboardingViewState extends State<OnboardingView> {
         },
       ),
     );
+  }
+
+  String notifierLabel(state) {
+    return state.currentPage == state.items.length - 1 ? "Get Started" : "Next";
   }
 }
