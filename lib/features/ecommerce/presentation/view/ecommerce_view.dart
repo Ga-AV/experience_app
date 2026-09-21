@@ -1,3 +1,6 @@
+import 'package:experience_app/auth_service.dart';
+import 'package:experience_app/features/admin/presentation/views/add_product_page.dart';
+import 'package:experience_app/features/admin/presentation/views/products_page.dart';
 import 'package:experience_app/features/ecommerce/domain/entities/product.dart';
 import 'package:experience_app/features/ecommerce/presentation/state/cart_provider.dart';
 import 'package:experience_app/features/ecommerce/presentation/state/ecommerce_provider.dart';
@@ -77,6 +80,15 @@ class EcommerceView extends ConsumerWidget {
           Icon(Icons.search, size: 28),
           Row(
             children: [
+              InkWell(
+                child: Icon(Icons.person_outlined),
+                onTap: () async => {
+                  Navigator.of(
+                    context,
+                  ).push(MaterialPageRoute(builder: (_) => ProductsPage())),
+                },
+              ),
+              SizedBox(width: 16),
               Icon(Icons.favorite_border),
               SizedBox(width: 16),
               InkWell(
@@ -104,6 +116,11 @@ class EcommerceView extends ConsumerWidget {
                     context,
                   ).push(MaterialPageRoute(builder: (_) => const CartView())),
                 },
+              ),
+              SizedBox(width: 16),
+              InkWell(
+                child: Icon(Icons.logout),
+                onTap: () async => {await authService.value.signOut()},
               ),
             ],
           ),
