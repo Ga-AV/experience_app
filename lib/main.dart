@@ -1,18 +1,17 @@
-import 'package:experience_app/features/admin/presentation/views/add_product_page.dart';
+import 'package:experience_app/core/notifications/firebase_messaging_service.dart';
 import 'package:experience_app/features/ecommerce/presentation/view/ecommerce_view.dart';
 import 'package:experience_app/features/login/presentation/views/login_view.dart';
-import 'package:experience_app/features/onboarding/presentation/views/onboarding_view.dart';
 import 'package:experience_app/firebase_options.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await FirebaseMessagingService.initialize();
   runApp(ProviderScope(child: MyApp()));
 }
 
