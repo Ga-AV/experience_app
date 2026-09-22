@@ -230,15 +230,40 @@ class PaymentView extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(22),
                     ),
                   ),
-                  onPressed: () async {
-                    await notifier.processPayment(total);
 
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Payment processed')),
-                      );
-                    }
-                  },
+                  // onPressed: () async {
+                  // await notifier.processPayment(total);
+
+                  // if (context.mounted) {
+                  //   ScaffoldMessenger.of(context).showSnackBar(
+                  //     SnackBar(content: Text('Payment processed')),
+                  //   );
+                  // }
+                  onPressed: state.isLoading
+                      ? null
+                      : () async {
+                          final success = await notifier.processPayment(total);
+
+                          if (!context.mounted) {
+                            return;
+                          }
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                success
+                                    ? 'Payment processed successfully'
+                                    : state.error ?? 'Payment failed',
+                              ),
+                            ),
+                          );
+
+                          if (success) {
+                            Navigator.pop(context);
+                          }
+                        },
+
+                  //  },
                   child: state.isLoading
                       ? CircularProgressIndicator(color: Colors.white)
                       : Text(
