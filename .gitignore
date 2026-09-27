@@ -46,4 +46,6 @@ app.*.map.json
 
 backend/serviceAccountKey.json
 backend/.venv/
+.firebase-data/
+
 

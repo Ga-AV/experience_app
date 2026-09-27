@@ -1,18 +1,32 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:experience_app/core/notifications/firebase_messaging_service.dart';
 import 'package:experience_app/features/ecommerce/presentation/view/ecommerce_view.dart';
 import 'package:experience_app/features/login/presentation/views/login_view.dart';
 import 'package:experience_app/firebase_options.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'firebase_options.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  const useFirebaseEmulators = bool.fromEnvironment('USE_FIREBASE_EMULATORS');
+
+  if (kDebugMode && useFirebaseEmulators) {
+    // Firebase Authentication Emulator
+    await FirebaseAuth.instance.useAuthEmulator('10.0.2.2', 9099);
+
+    // Firestore Emulator
+    FirebaseFirestore.instance.useFirestoreEmulator('10.0.2.2', 8080);
+  }
+
   await FirebaseMessagingService.initialize();
-  runApp(ProviderScope(child: MyApp()));
+
+  runApp(const ProviderScope(child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -24,8 +38,10 @@ class MyApp extends StatelessWidget {
       title: 'Experience App',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: .fromSeed(seedColor: Color.fromARGB(255, 185, 211, 255)),
-        fontFamily: "OpenSans",
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color.fromARGB(255, 185, 211, 255),
+        ),
+        fontFamily: 'OpenSans',
         useMaterial3: true,
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
@@ -58,7 +74,9 @@ class AuthGate extends StatelessWidget {
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const CircularProgressIndicator();
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
         }
 
         if (snapshot.hasData) {
