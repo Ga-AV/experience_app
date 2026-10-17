@@ -24,8 +24,9 @@ try {
   process.exit(1);
 }
 
+
 app.use('/api/v1/credit-cards', creditCardsRouter);
-app.use('/api/v1/credit-cards', creditCardsRouter);
+
 
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok' });
